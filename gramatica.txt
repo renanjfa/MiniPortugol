@@ -1,4 +1,4 @@
-Programa → algoritmo identificador ; BlocoV ariaveis P rocedimentoF uncao BlocoComandos .
+Programa → algoritmo identificador ; BlocoVariaveis ProcedimentoFuncao BlocoComandos .
 
 ProcedimentoFuncao → DeclaraProcedimento ProcedimentoFuncao
 ProcedimentoFuncao → DeclaraFuncao ProcedimentoFuncao
