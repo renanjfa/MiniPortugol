@@ -54,7 +54,9 @@ int dicionario_indice(char c) {
     else if(c == '+')               return 17;
     else if(c == '-')               return 18;
     else if(c == '*')               return 19;
-    else if(c == '\n' || c == ' ' || c == '\t' || c == '\r')              return 20;
+    else if(c == '\n' || c == '\r') return 20;
+    else if(c == ' ' || c == '\t')  return 21;
+    else if(c == '_')               return 22;
     else                            return -1;
 }
 
@@ -123,48 +125,48 @@ unordered_map<string, string> reservadas = {
     {"div", "DIV"},
 };
 
-int automato[31][21] = {
+int automato[31][23] = {
     
     // colunas:
+    //  0-9, a-z, ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n  space  _
+    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19  20  21    22
+/*0*/  { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0},
+/*1*/  { 3,   2,  6, 8,11, 0,16,13,14,15,17,18,19,20,21,22,26,28,29,30, 0,  0,    0},
+/*2*/  { 2,   2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    2}, // ID
+/*3*/  { 3,   0,  0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // NUM
+/*4*/  { 5,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0},
+/*5*/  { 5,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // REAL
+/*6*/  { 6,   6,  7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0,  6,    6},
     //  0-9, a-z, ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n
-    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20  21
-/*0*/  { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-/*1*/  { 3,   2,  6, 8,11, 0,16,13,14,15,17,18,19,20,21,22,26,28,29,30, 0},
-/*2*/  { 2,   2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // ID
-/*3*/  { 3,   0,  0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // NUM
-/*4*/  { 5,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-/*5*/  { 5,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // REAL
-/*6*/  { 6,   6,  7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
-    //  0-9, a-z, ", ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n
-    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20  21
-/*7*/  { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // STRING
-/*8*/  { 0,   0,  0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // DIVISAO
-/*9*/  { 9,   9,  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,10},
-/*10*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // COMMENT LINHA
-/*11*/ {11,  11, 11,11,11,12,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11},
-/*12*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // COMMENT BLOCO
-/*13*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // PONTO_VIRGULA
-/*14*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // VIRGULA
-/*15*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // DOIS_PONTOS
-    //  0-9, a-z, ", ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n 
-    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20  21
-/*16*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // PONTO
-/*17*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // ABRE_COLCHETES
-/*18*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // FECHA_COLCHETES
-/*19*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // ABRE_PARENTESES
-/*20*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // FECHA_PARENTESES
-/*21*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // IGUAL
-/*22*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,24, 0,23, 0,25, 0, 0}, // MENOR
-/*23*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // DIFERENTE
-    //  0-9, a-z, ", ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n
-    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20  21
-/*24*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // MENOR_IGUAL
-/*25*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // ATRIBUICAO
-/*26*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,27, 0, 0, 0, 0, 0, 0}, // MAIOR
-/*27*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // MAIOR IGUAL
-/*28*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // MAIS
-/*29*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // MENOS
-/*30*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // VEZES
+    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19  20  21
+/*7*/  { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // STRING
+/*8*/  { 0,   0,  0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // DIVISAO
+/*9*/  { 9,   9,  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,10,  9,    9},
+/*10*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // COMMENT LINHA
+/*11*/ {11,  11, 11,11,11,12,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,  11,  11},
+/*12*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // COMMENT BLOCO
+/*13*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // PONTO_VIRGULA
+/*14*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // VIRGULA
+/*15*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // DOIS_PONTOS
+    //  0-9, a-z, ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n 
+    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19  20  
+/*16*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // PONTO
+/*17*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // ABRE_COLCHETES
+/*18*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // FECHA_COLCHETES
+/*19*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // ABRE_PARENTESES
+/*20*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // FECHA_PARENTESES
+/*21*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // IGUAL
+/*22*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,24, 0,23, 0,25, 0, 0,  0,    0}, // MENOR
+/*23*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // DIFERENTE
+    //  0-9, a-z, ", /, {, }, ., ;, ,, :, [, ], (, ), =, <, >, +, -, *, \n
+    //   0    1   2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19  20  
+/*24*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // MENOR_IGUAL
+/*25*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // ATRIBUICAO
+/*26*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,27, 0, 0, 0, 0, 0, 0,  0,    0}, // MAIOR
+/*27*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // MAIOR IGUAL
+/*28*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // MAIS
+/*29*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // MENOS
+/*30*/ { 0,   0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,    0}, // VEZES
 
 };
 
@@ -198,7 +200,7 @@ void analisador_lexico(string s) {
 
     while (i < tam) {
 
-        if (s[i] == ' ' || s[i] == '\n' || s[i] == '\t' || s[i] == '\r') {
+        if (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r') {
             i++;
             continue;
         }
@@ -236,8 +238,14 @@ void analisador_lexico(string s) {
             string nome_token = dicionario_token(last_final_state);
             string lexema = s.substr(i, last_final_pos - i + 1);
 
-            if(nome_token == "ID")
-                isPalavraReservada(lexema, nome_token);
+            if(nome_token == "ID") {
+                string lexema_minusculo = lexema;
+                for(char &c : lexema_minusculo) c = tolower(c);
+                
+                if(reservadas.count(lexema_minusculo)) {
+                    nome_token = reservadas[lexema_minusculo];
+                }
+            }
 
             if (nome_token != "COMMENT_LINHA" && nome_token != "COMMENT_BLOCO") {
                 TOKENS.push_back(TOKEN(last_final_state, lexema, nome_token));
@@ -248,7 +256,8 @@ void analisador_lexico(string s) {
         
         else {
             TOKENS.push_back(TOKEN(-1, string(1, s[i]), dicionario_token(-1)));
-            printar("ERRO LEXICO. Linha: $ Coluna $ -> '" + string(1, s[i]) + "'"); exit(1);
+            printar("ERRO LEXICO. Linha: $ Coluna $ -> '" + string(1, s[i]) + "'"); 
+            exit(1);
             i++; 
         }
     }
@@ -270,7 +279,8 @@ void eat(string esperado) {
     if(esperado == token_atual().token) 
         pos_token++;
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
@@ -296,6 +306,7 @@ void Comandos();
 void X3();
 void X4();
 void X5();
+void X7();
 void Expressao();
 void ExpressaoLinha();
 void ExpressaoSimples();
@@ -330,7 +341,8 @@ void Programa() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
@@ -588,7 +600,8 @@ void VetorMatriz() {
         eat("MATRIZ");
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
@@ -652,7 +665,8 @@ void TipoBasico() {
         eat("ID");
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
@@ -712,7 +726,7 @@ void Comandos() {
 
         eat("ID");
 
-        X3();
+        X7();
     }
 
     else if(token_atual().token == "SE") {
@@ -794,10 +808,25 @@ void Comandos() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
+
+void X7() {
+    if(token_atual().token == "ATRIBUICAO") {
+
+        eat("ATRIBUICAO");
+
+        Expressao();
+    }
+
+    else {
+
+        X3();
+    }
+}
 
 // ======================================================
 // X3
@@ -1002,7 +1031,8 @@ void ExpressaoSimples() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
@@ -1173,7 +1203,8 @@ void Fator() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); exit(1);
+        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        exit(1);
     }
 }
 
@@ -1241,12 +1272,12 @@ void analisador_sintatico() {
 
     Programa();
 
-    if(!erro) {
+    // if(!erro) {
 
-        int size = TOKENS.size();
-        if(pos_token == size) 
-            printar("CADEIA ACEITA");
-    }
+    //     int size = TOKENS.size();
+    //     if(pos_token == size) 
+    //         printar("CADEIA ACEITA");
+    // }
 }
 
 int main() {
