@@ -1,0 +1,103 @@
+Programa → algoritmo identificador ; BlocoV ariaveis P rocedimentoF uncao BlocoComandos .
+
+ProcedimentoFuncao → DeclaraProcedimento ProcedimentoFuncao
+ProcedimentoFuncao → DeclaraFuncao ProcedimentoFuncao
+ProcedimentoFuncao →
+
+DeclaraProcedimento → procedimento identificador Parametros ; DeclaraParametros BlocoVariaveis BlocoComandos ;
+
+DeclaraFuncao → funcao identificador Parametros : TipoBasico ; DeclaraParametros BlocoVariaveis BlocoComandos ;
+
+Parametros → ( DeclaraIdentificador )
+Parametros →
+
+DeclaraParametros → Declaracoes
+DeclaraParametros →
+
+BlocoVariaveis → variaveis Declaracoes
+BlocoVariaveis →
+
+Declaracoes → DeclaraVariaveis
+Declaracoes → DeclaraTipo
+Declaracoes → DeclaraVariaveis Declaracoes
+Declaracoes → DeclaraTipo Declaracoes
+
+DeclaraTipo → tipo identificador = VetorMatriz [ Dimensao ] TipoBasico ;
+DeclaraVariaveis → TipoBasico : DeclaraIdentificador ;
+DeclaraIdentificador → identificador X1
+X1 →
+X1 → , DeclaraIdentificador
+
+VetorMatriz → vetor
+VetorMatriz → matriz
+
+Dimensao → numero_inteiro : numero_inteiro X2
+X2 →
+X2 → , Dimensao
+
+TipoBasico → inteiro
+TipoBasico → real
+TipoBasico → caractere
+TipoBasico → logico
+TipoBasico → identificador
+
+BlocoComandos → inicio ListaComandos fim
+
+ListaComandos → Comandos ;
+ListaComandos → Comandos ; ListaComandos
+
+Comandos → identificador X3
+X3 →
+X3 → (ExprIter )
+Comandos → Variavel <- Expressao
+Comandos → se Expressao entao ListaComandos X4
+X4 → fim se
+X4 → senao ListaComandos fim se
+Comandos → enquanto Expressao faca ListaComandos fim enquanto
+Comandos → para identificador de Expressao ate Expressao X5
+X5 → faca ListaComandos fim para
+X5 → passo Expressao faca ListaComandos fim para
+Comandos → repita ListaComandos ate Expressao
+Comandos → leia ( Variavel )
+Comandos → imprima ( ExprIter )
+
+Expressao → ExpressaoSimples Expressao'
+Expressao' → = ExpressaoSimples Expressao'
+Expressao' → <> ExpressaoSimples Expressao'
+Expressao' → < ExpressaoSimples Expressao'
+Expressao' → <= ExpressaoSimples Expressao'
+Expressao' → >= ExpressaoSimples Expressao'
+Expressao' → > ExpressaoSimples Expressao'
+Expressao' → 
+
+ExpressaoSimples → Termo ExpressaoSimples'
+ExpressaoSimples → + Termo ExpressaoSimples'
+ExpressaoSimples → - Termo ExpressaoSimples'
+ExpressaoSimples' → + Termo ExpressaoSimples'
+ExpressaoSimples' → - Termo ExpressaoSimples'
+ExpressaoSimples' → OU Termo ExpressaoSimples'
+ExpressaoSimples' →
+
+Termo → Fator Termo'
+Termo' → * Fator Termo'
+Termo' → / Fator Termo'
+Termo' → DIV Fator Termo'
+Termo' → E Fator Termo'
+Termo' →
+
+Fator → ( Expressao )
+Fator → NAO Fator
+Fator → numero inteiro
+Fator → numero real
+Fator → verdadeiro
+Fator → falso
+Fator → string
+Fator → identificador ( ExprIter )
+Fator → Variavel
+
+Variavel → identificador X6
+X6 →
+X6 → [ ExprIter ]
+
+ExprIter → Expressao
+ExprIter → Expressao , ExprIter
