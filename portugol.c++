@@ -9,11 +9,15 @@ public:
     string lexema;
     int state;
     string token;
+    int linha;
+    int coluna;
 
-    TOKEN(int s, string l, string t) {
+    TOKEN(int s, string l, string t, int lin, int col) {
         lexema = l;
         state = s;
         token = t;
+        linha = lin;
+        coluna = col;
     }
 
 };
@@ -196,11 +200,24 @@ void analisador_lexico(string s) {
 
     int tam = s.size();
 
+    int linha = 1;
+    int coluna = 1;
+
     int i = 0;
 
     while (i < tam) {
 
         if (s[i] == ' ' || s[i] == '\t' || s[i] == '\n' || s[i] == '\r') {
+
+            if(s[i] == '\n') {
+                linha++;
+                coluna = 1;
+            }
+
+            else 
+                coluna++;
+            
+
             i++;
             continue;
         }
@@ -213,6 +230,8 @@ void analisador_lexico(string s) {
 
         int j = i;
 
+        int linha_token = linha;
+        int coluna_token = coluna;
         while (j < tam) {
 
             int ind = dicionario_indice(s[j]);
@@ -223,6 +242,14 @@ void analisador_lexico(string s) {
                 break;
 
             token += s[j];
+            if(s[j] == '\n') {
+                linha++;
+                coluna = 1;
+            }
+
+            else 
+                coluna++;
+            
             state = prox_estado;
 
             if (finais[state]) {
@@ -248,15 +275,15 @@ void analisador_lexico(string s) {
             }
 
             if (nome_token != "COMMENT_LINHA" && nome_token != "COMMENT_BLOCO") {
-                TOKENS.push_back(TOKEN(last_final_state, lexema, nome_token));
+                TOKENS.push_back(TOKEN(last_final_state, lexema, nome_token, linha_token, coluna_token));
             }
 
             i = last_final_pos + 1; 
         }
         
         else {
-            TOKENS.push_back(TOKEN(-1, string(1, s[i]), dicionario_token(-1)));
-            printar("ERRO LEXICO. Linha: $ Coluna $ -> '" + string(1, s[i]) + "'"); 
+            TOKENS.push_back(TOKEN(-1, string(1, s[i]), dicionario_token(-1), linha, coluna));
+            printar("ERRO LEXICO. Linha: " + to_string(linha-1) + " Coluna: " + to_string(coluna) + " -> '" + string(1, s[i]) + "'"); 
             exit(1);
             i++; 
         }
@@ -269,7 +296,7 @@ TOKEN token_atual() {
     int size = TOKENS.size();
     if(pos_token < size)
         return TOKENS[pos_token];
-    return TOKEN(-1, "", "EOF");
+    return TOKEN(-1, "", "EOF", -1, -1);
 }
 
 void eat(string esperado) {
@@ -279,7 +306,7 @@ void eat(string esperado) {
     if(esperado == token_atual().token) 
         pos_token++;
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'"); 
         exit(1);
     }
 }
@@ -341,7 +368,7 @@ void Programa() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'");  
         exit(1);
     }
 }
@@ -600,7 +627,7 @@ void VetorMatriz() {
         eat("MATRIZ");
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'");  
         exit(1);
     }
 }
@@ -665,7 +692,7 @@ void TipoBasico() {
         eat("ID");
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'");  
         exit(1);
     }
 }
@@ -808,20 +835,29 @@ void Comandos() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'");  
         exit(1);
     }
 }
 
 
 void X7() {
-    if(token_atual().token == "ATRIBUICAO") {
+     if(erro) return;
+
+    // Variavel <- Expressao
+    if(
+        token_atual().token == "ABRE_COLCHETES" ||
+        token_atual().token == "ATRIBUICAO"
+    ) {
+
+        X6();
 
         eat("ATRIBUICAO");
 
         Expressao();
     }
 
+    // chamada de procedimento
     else {
 
         X3();
@@ -1031,7 +1067,7 @@ void ExpressaoSimples() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'");  
         exit(1);
     }
 }
@@ -1203,7 +1239,7 @@ void Fator() {
     }
 
     else {
-        printar("ERRO DE SINTAXE. Linha: $ Coluna: $ -> '" + token_atual().lexema + "'"); 
+        printar("ERRO DE SINTAXE. Linha: " + to_string(token_atual().linha-1) + " Coluna: " + to_string(token_atual().coluna) + " -> '" + token_atual().lexema + "'");  
         exit(1);
     }
 }
